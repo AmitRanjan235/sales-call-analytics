@@ -37,7 +37,14 @@ def main():
     data_dir.mkdir(exist_ok=True)
     print(f"✓ Data directory created/verified: {data_dir.absolute()}")
     
-    # Install dependencies
+    # Check if conda environment is activated
+    conda_prefix = os.environ.get('CONDA_PREFIX')
+    if not conda_prefix or not conda_prefix.endswith('conda_env'):
+        print("Please activate the conda environment first:")
+        print("  conda activate ./conda_env")
+        sys.exit(1)
+    
+    # Install dependencies (should already be installed if using conda setup)
     if not run_command("pip install -r requirements.txt", "Installing Python dependencies"):
         print("Failed to install dependencies. Please check your Python environment.")
         sys.exit(1)

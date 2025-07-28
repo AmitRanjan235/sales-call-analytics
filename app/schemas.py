@@ -1,7 +1,7 @@
-from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional, List
 from datetime import datetime
-from uuid import UUID
+from typing import List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CallBase(BaseModel):
@@ -19,12 +19,12 @@ class CallCreate(CallBase):
 
 
 class CallResponse(CallBase):
-    id: UUID
+    id: str
     agent_talk_ratio: Optional[float] = None
     customer_sentiment_score: Optional[float] = None
     created_at: datetime
     updated_at: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -63,7 +63,7 @@ class AgentAnalytics(BaseModel):
     avg_sentiment: Optional[float]
     avg_talk_ratio: Optional[float]
     total_calls: int
-    
+
     model_config = ConfigDict(from_attributes=True)
 
 

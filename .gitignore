@@ -24,6 +24,7 @@ wheels/
 # Virtual Environment
 venv/
 ENV/
+conda_env/
 .env
 
 # IDE
