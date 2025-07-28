@@ -45,3 +45,8 @@ alembic/versions/*.pyc
 
 # Logs
 *.log
+
+# SQLite Database
+data/
+*.db
+*.sqlite
