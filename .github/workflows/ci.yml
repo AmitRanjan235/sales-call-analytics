@@ -89,6 +89,8 @@ jobs:
         context: .
         platforms: linux/amd64,linux/arm64
         push: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
         tags: |
           ${{ secrets.DOCKER_USERNAME }}/sales-call-analytics:latest
           ${{ secrets.DOCKER_USERNAME }}/sales-call-analytics:${{ github.sha }}
