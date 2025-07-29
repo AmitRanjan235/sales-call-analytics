@@ -5,9 +5,11 @@ A FastAPI-based microservice for ingesting, analyzing, and providing insights on
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.9+
+- Python 3.11+
 - pip or conda
 - Git
+- Docker (optional, for containerization)
+- PostgreSQL (for production setup)
 
 ### Setup Steps
 
@@ -63,12 +65,12 @@ The API provides endpoints for retrieving call data, analytics, and AI-powered r
 ### Core Endpoints
 
 #### 1. Health Check
-**GET** `/health`
+**GET** `/api/v1/health`
 
 Check the health status of the API service.
 
 ```bash
-curl -X GET "http://localhost:8000/health" \
+curl -X GET "http://localhost:8000/api/v1/health" \
   -H "accept: application/json"
 ```
 
@@ -76,7 +78,9 @@ curl -X GET "http://localhost:8000/health" \
 ```json
 {
   "status": "healthy",
-  "service": "sales-call-analytics"
+  "service": "sales-call-analytics",
+  "version": "1.0.0",
+  "timestamp": "<ISO formatted timestamp>"
 }
 ```
 
@@ -309,15 +313,124 @@ ws.onmessage = function(event) {
 - **Memory Usage**: Models loaded once at startup, shared across requests
 - **Concurrency**: FastAPI's async support handles multiple concurrent requests efficiently
 
+## 🐳 Docker Deployment
+
+### Build and Run with Docker
+
+```bash
+# Build the Docker image
+docker build -t sales-call-analytics .
+
+# Run the container
+docker run -p 8000:8000 sales-call-analytics
+```
+
+### Docker Compose (with PostgreSQL)
+
+```yaml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/sales_analytics
+      - SECRET_KEY=your-secret-key
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=sales_analytics
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+```
+
+## 🔄 CI/CD Pipeline
+
+### GitHub Actions Workflow
+
+The project includes a comprehensive CI/CD pipeline that:
+
+1. **Installs Dependencies** - Sets up Python 3.11 and installs requirements
+2. **Runs Database Migrations** - Sets up PostgreSQL schema with Alembic
+3. **Executes Tests** - Runs all 30+ test cases with pytest
+4. **Performs Type Checking** - Validates code with mypy
+5. **Builds Docker Image** - Creates production-ready container
+6. **Pushes to Registry** - Deploys to Docker Hub (on main branch only)
+
+### Workflow Triggers
+- **Push to main branch** - Full pipeline with deployment
+- **Pull requests** - Testing and validation only
+
+### Required Secrets
+For Docker deployment, add these GitHub secrets:
+- `DOCKER_USERNAME` - Your Docker Hub username
+- `DOCKER_PASSWORD` - Your Docker Hub password/token
+
+### Pipeline Status
+The CI pipeline ensures:
+- ✅ Code formatting (black, isort)
+- ✅ Type safety (mypy)
+- ✅ Test coverage (pytest)
+- ✅ Container builds successfully
+- ✅ Production-ready deployments
+
 ## 🚀 Production Deployment
 
-For production deployment, consider:
+### Environment Variables
+
+Set these environment variables for production:
+
+```bash
+# Database
+DATABASE_URL=postgresql://user:password@host:5432/dbname
+
+# Security
+SECRET_KEY=your-super-secret-key-here
+
+# Optional: OpenAI API for enhanced coaching
+OPENAI_API_KEY=your-openai-api-key
+
+# Optional: Redis for background tasks
+REDIS_URL=redis://redis:6379
+```
+
+### Production Checklist
 
 1. **Database**: Migrate to PostgreSQL with proper connection pooling
 2. **Security**: Add authentication, HTTPS, and API rate limiting
 3. **Monitoring**: Implement logging, metrics, and health checks
 4. **Scaling**: Use multiple instances behind a load balancer
 5. **Background Jobs**: Add Celery for async processing of large datasets
+6. **Backup**: Set up automated database backups
+7. **SSL/TLS**: Enable HTTPS with proper certificates
+8. **Resource Limits**: Configure memory and CPU limits
+
+### Health Checks
+
+Use the health endpoint for load balancer and monitoring:
+
+```bash
+# Health check endpoint
+GET /api/v1/health
+
+# Expected response (200 OK)
+{
+  "status": "healthy",
+  "service": "sales-call-analytics",
+  "version": "1.0.0",
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
 
 ## 📝 License
 
