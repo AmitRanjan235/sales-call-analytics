@@ -38,6 +38,17 @@ router = APIRouter(prefix="/api/v1")
 ai_module = AIInsightModule()
 
 
+@router.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring."""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "service": "sales-call-analytics",
+        "version": "1.0.0",
+    }
+
+
 @router.get("/calls", response_model=List[CallResponse])
 async def get_calls(
     limit: int = Query(10, ge=1, le=100),
