@@ -35,9 +35,10 @@ class Call(Base):
     @property
     def embedding_list(self):
         """Convert embedding JSON string to list of floats."""
-        if self.embedding:
+        embedding_value = getattr(self, "_embedding", None) or self.embedding
+        if embedding_value:
             try:
-                return json.loads(self.embedding)
+                return json.loads(str(embedding_value))
             except (json.JSONDecodeError, TypeError):
                 return None
         return None
@@ -45,9 +46,9 @@ class Call(Base):
     def set_embedding(self, embedding_list):
         """Set embedding from list of floats."""
         if embedding_list:
-            self.embedding = json.dumps(embedding_list)
+            object.__setattr__(self, "embedding", json.dumps(embedding_list))
         else:
-            self.embedding = None
+            object.__setattr__(self, "embedding", None)
 
 
 class Analytics(Base):
