@@ -51,6 +51,10 @@ jobs:
         echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/test_sales_analytics" >> $GITHUB_ENV
         echo "SECRET_KEY=test-secret-key" >> $GITHUB_ENV
     
+    - name: Run database migrations
+      run: |
+        alembic upgrade head
+    
     - name: Run tests
       run: |
         pytest tests/ -v
