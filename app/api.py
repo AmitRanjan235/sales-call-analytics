@@ -38,6 +38,17 @@ router = APIRouter(prefix="/api/v1")
 ai_module = AIInsightModule()
 
 
+@router.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring."""
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "service": "sales-call-analytics",
+        "version": "1.0.0",
+    }
+
+
 @router.get("/calls", response_model=List[CallResponse])
 async def get_calls(
     limit: int = Query(10, ge=1, le=100),
@@ -92,18 +103,24 @@ async def get_call_detail(call_id: str, db: Session = Depends(get_db)):
 
         # Create response with embedding as list
         call_detail = CallDetail(
-            id=call.id,
-            call_id=call.call_id,
-            agent_id=call.agent_id,
-            customer_id=call.customer_id,
-            language=call.language,
-            start_time=call.start_time,
-            duration_seconds=call.duration_seconds,
-            transcript=call.transcript,
-            agent_talk_ratio=call.agent_talk_ratio,
-            customer_sentiment_score=call.customer_sentiment_score,
-            created_at=call.created_at,
-            updated_at=call.updated_at,
+            id=str(getattr(call, "id", "")),
+            call_id=str(getattr(call, "call_id", "")),
+            agent_id=str(getattr(call, "agent_id", "")),
+            customer_id=str(getattr(call, "customer_id", "")),
+            language=str(getattr(call, "language", "")),
+            start_time=getattr(call, "start_time", datetime.utcnow()),
+            duration_seconds=int(getattr(call, "duration_seconds", 0)),
+            transcript=str(getattr(call, "transcript", "")),
+            agent_talk_ratio=float(getattr(call, "agent_talk_ratio", 0.0))
+            if getattr(call, "agent_talk_ratio", None) is not None
+            else None,
+            customer_sentiment_score=float(
+                getattr(call, "customer_sentiment_score", 0.0)
+            )
+            if getattr(call, "customer_sentiment_score", None) is not None
+            else None,
+            created_at=getattr(call, "created_at", datetime.utcnow()),
+            updated_at=getattr(call, "updated_at", datetime.utcnow()),
             embedding=call.embedding_list,
         )
         return call_detail
@@ -167,9 +184,9 @@ async def get_call_recommendations(call_id: str, db: Session = Depends(get_db)):
 
         # Generate coaching nudges
         coaching_messages = ai_module.generate_coaching_nudges(
-            target_call.transcript,
-            target_call.customer_sentiment_score or 0.0,
-            target_call.agent_talk_ratio or 0.5,
+            str(getattr(target_call, "transcript", "")),
+            float(getattr(target_call, "customer_sentiment_score", 0.0) or 0.0),
+            float(getattr(target_call, "agent_talk_ratio", 0.5) or 0.5),
         )
 
         coaching_nudges = [
@@ -226,10 +243,10 @@ async def get_agent_analytics(db: Session = Depends(get_db)):
         else:
             agent_analytics = [
                 AgentAnalytics(
-                    agent_id=analytic.agent_id,
-                    avg_sentiment=analytic.avg_sentiment,
-                    avg_talk_ratio=analytic.avg_talk_ratio,
-                    total_calls=analytic.total_calls,
+                    agent_id=str(getattr(analytic, "agent_id", "")),
+                    avg_sentiment=getattr(analytic, "avg_sentiment", None),
+                    avg_talk_ratio=getattr(analytic, "avg_talk_ratio", None),
+                    total_calls=int(getattr(analytic, "total_calls", 0)),
                 )
                 for analytic in analytics
             ]
@@ -244,7 +261,7 @@ async def get_agent_analytics(db: Session = Depends(get_db)):
         )
 
 
-# WebSocket endpoint for real-time sentiment updates (bonus feature)
+# WebSocket endpoint for real-time sentiment updates
 @router.websocket("/ws/sentiment/{call_id}")
 async def websocket_sentiment_updates(websocket: WebSocket, call_id: str):
     """Stream real-time sentiment updates for a call."""

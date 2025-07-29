@@ -8,9 +8,13 @@ from app.models import Analytics, Call
 
 def test_health_check(client):
     """Test health check endpoint."""
-    response = client.get("/health")
+    response = client.get("/api/v1/health")
     assert response.status_code == 200
-    assert response.json()["status"] == "healthy"
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert data["service"] == "sales-call-analytics"
+    assert data["version"] == "1.0.0"
+    assert "timestamp" in data
 
 
 def test_root_endpoint(client):

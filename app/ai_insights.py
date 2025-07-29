@@ -40,7 +40,7 @@ class AIInsightModule:
         """Generate sentence embedding for the given text."""
         try:
             embedding = self.embedding_model.encode(text)
-            return embedding.tolist()
+            return list(embedding.tolist())
         except Exception as e:
             logger.error(f"Error generating embedding: {e}")
             return []
@@ -191,9 +191,12 @@ class AIInsightModule:
                     )
 
                     content = response.choices[0].message.content
-                    nudges = [
-                        line.strip() for line in content.split("\n") if line.strip()
-                    ][:3]
+                    if content:
+                        nudges = [
+                            line.strip() for line in content.split("\n") if line.strip()
+                        ][:3]
+                    else:
+                        nudges = []
                 except Exception as e:
                     logger.warning(f"OpenAI API error, falling back to rule-based: {e}")
                     nudges = []

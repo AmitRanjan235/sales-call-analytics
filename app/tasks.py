@@ -79,10 +79,10 @@ def recalculate_analytics():
                 )
 
                 if analytics:
-                    analytics.avg_sentiment = avg_sentiment
-                    analytics.avg_talk_ratio = avg_talk_ratio
-                    analytics.total_calls = total_calls
-                    analytics.last_updated = datetime.utcnow()
+                    object.__setattr__(analytics, "avg_sentiment", avg_sentiment)
+                    object.__setattr__(analytics, "avg_talk_ratio", avg_talk_ratio)
+                    object.__setattr__(analytics, "total_calls", total_calls)
+                    object.__setattr__(analytics, "last_updated", datetime.utcnow())
                 else:
                     analytics = Analytics(
                         agent_id=agent_id,
