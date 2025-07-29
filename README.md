@@ -16,7 +16,7 @@ A production-ready FastAPI microservice for ingesting, analyzing, and providing 
 #### Option 1: Quick Setup (Recommended)
 ```bash
 # Clone and navigate to the project
-git clone <repo-link>
+git clone https://github.com/AmitRanjan235/sales-call-analytics.git
 cd sales-call-analytics
 
 # Run automated setup
