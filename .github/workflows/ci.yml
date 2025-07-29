@@ -73,8 +73,6 @@ jobs:
         platforms: linux/amd64
         push: false
         tags: sales-call-analytics:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
     
     - name: Log in to Docker Hub (only on main branch)
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -94,5 +92,3 @@ jobs:
         tags: |
           ${{ secrets.DOCKER_USERNAME }}/sales-call-analytics:latest
           ${{ secrets.DOCKER_USERNAME }}/sales-call-analytics:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
